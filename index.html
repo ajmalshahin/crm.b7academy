@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>B7 Academy Sales CRM</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f4f7;--sf:#fff;--tx:#241a2b;--mu:#6e6377;--bd:#e3dce8;--ac:#8a2b6f;--hy:#fff3b0;--gy:#ececf0;--rd:#fde2e2;--rdt:#a11;--am:#fff0cc;--amt:#8a5a00;--gn:#dff5e3;--gnt:#17692c;--bl:#e1ecff;--blt:#1a4fa0;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17121b;--sf:#221b28;--tx:#f1eaf5;--mu:#a99bb4;--bd:#3a2f43;--ac:#d977bd;--hy:#5c5313;--gy:#332b3a;--rd:#5a2326;--rdt:#ffb3b3;--am:#5a4413;--amt:#ffd98a;--gn:#1d4a28;--gnt:#9be3ac;--bl:#1d3358;--blt:#a9c8ff;color-scheme:dark}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:14px 16px 0}h1{margin:0;font-size:18px;color:var(--ac)}.sub{color:var(--mu);font-size:12px}
+nav{display:flex;gap:4px;padding:10px 16px 0;overflow-x:auto;border-bottom:1px solid var(--bd)}
+nav button{border:0;background:none;color:var(--mu);padding:8px 12px;font:inherit;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+nav button.on{color:var(--ac);border-color:var(--ac);font-weight:600}
+main{padding:14px 16px 40px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.k{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px}.k b{display:block;font-size:20px}.k span{font-size:10px;letter-spacing:.04em;color:var(--mu)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;overflow-x:auto}
+h3{margin:0 0 6px;font-size:13px}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--bd);padding:3px 6px;text-align:left;white-space:nowrap}
+th{background:var(--gy);font-size:11px}th.in{background:var(--hy)}td.n{text-align:right}
+.wrap{overflow:auto;max-height:70vh;background:var(--sf);border:1px solid var(--bd);border-radius:8px}
+.wrap th{position:sticky;top:0;z-index:1}
+td input,td select{border:0;background:transparent;color:inherit;font:inherit;width:100%;min-width:90px;padding:3px}
+td input:focus,td select:focus{outline:2px solid var(--ac)}td.au{background:var(--gy)}
+.f-Overdue{background:var(--rd);color:var(--rdt)}.f-Due\ today{background:var(--am);color:var(--amt)}.f-No\ date\ set{background:var(--am);color:var(--amt)}.f-Upcoming{background:var(--bl);color:var(--blt)}.f-Paid{background:var(--gn);color:var(--gnt)}.f-Partial{background:var(--am);color:var(--amt)}.f-Unpaid{background:var(--rd);color:var(--rdt)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.bar input,.bar select{padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font:inherit}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:7px 12px;font:inherit;cursor:pointer}.btn.g{background:var(--gy);color:var(--tx)}
+.ls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.ls input{width:100%;margin-bottom:3px;padding:4px;border:1px solid var(--bd);border-radius:4px;background:var(--sf);color:var(--blt)}
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9;padding:16px}#login .card{width:100%;max-width:340px}#login input{width:100%;padding:9px;margin:6px 0 10px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font:inherit}.err{color:var(--rdt);font-size:12px;min-height:16px}li{margin-bottom:6px}.note{color:var(--mu);font-size:12px;margin:6px 0}
+</style></head><body>
+<header><h1>B7 Beauty Academy – Sales CRM</h1><div class="sub" id="today"></div><div class="sub" id="sync"></div><div class="sub" id="who"></div></header>
+<div id="login" style="display:none"></div><nav id="nav"></nav><main id="main"></main>
+<script>
+const TABS=["Dashboard","Enquiries","Enrolled Students","Lists","How to Use"];
+const LK=["Status","Source","Course","Batch","Assigned To","Lost Reason","Yes/No","Course Progress","Branch"];
+const DEF={Status:["New","Contacted","Interested","Follow-up Required","Visit / Demo Scheduled","Enrolled","Lost","On Hold","Not Available"],Source:["Instagram","Meta Ads","Facebook","Website","Walk-in","Phone Call","Referral","Google Search","WhatsApp","Wabis","Other"],Course:["Diploma in Cosmetology","Professional Makeup Artistry","Nail Art & Extensions","Hairdressing","Beauty & Skin Care Course","Hairstyling","Saree Draping"],Batch:Array.from({length:10},(_,i)=>"Batch "+(i+1)),"Assigned To":["Counsellor 1","Counsellor 2","Counsellor 3"],"Lost Reason":["Fees too high","Chose another academy","Timing/batch mismatch","Location too far","Not interested now","No response","Other"],"Yes/No":["Yes","No"],"Course Progress":["Not started","Ongoing","Completed","Dropped out"],Branch:["Angamaly","Kollam","Kochi","Palakkad"]};
+// c = column definition. t: d date, n number, s select(list), a auto, x text. g=1 → enrolment details group
+const C=[
+{k:"id",h:"Enquiry ID",t:"a"},{k:"date",h:"Date Received",t:"d"},{k:"source",h:"Source",t:"s",l:"Source"},{k:"name",h:"Name"},{k:"phone",h:"Phone / WhatsApp"},{k:"email",h:"Email"},{k:"city",h:"City / Area"},{k:"branch",h:"Preferred Branch",t:"s",l:"Branch"},{k:"course",h:"Course Interested",t:"s",l:"Course"},{k:"status",h:"Status",t:"s",l:"Status"},{k:"assigned",h:"Assigned To",t:"s",l:"Assigned To"},{k:"last",h:"Last Contact",t:"d"},{k:"next",h:"Next Follow-up",t:"d"},{k:"flag",h:"Follow-up Flag",t:"a"},{k:"days",h:"Days Since Enquiry",t:"a"},{k:"quoted",h:"Fee Quoted (₹)",t:"n"},{k:"enrolDate",h:"Enrolment Date",t:"d"},{k:"lost",h:"Lost Reason",t:"s",l:"Lost Reason"},{k:"notes",h:"Notes"},
+{k:"batch",h:"Batch",t:"s",l:"Batch",g:1},{k:"cs",h:"Course Start",t:"d",g:1},{k:"ce",h:"Course End",t:"d",g:1},{k:"total",h:"Total Fee (₹)",t:"n",g:1},{k:"paid",h:"Amount Paid (₹)",t:"n",g:1},{k:"bal",h:"Balance (₹)",t:"a",g:1},{k:"pstat",h:"Payment Status",t:"a",g:1},{k:"nextPay",h:"Next Payment Due",t:"d",g:1},{k:"pflag",h:"Payment Flag",t:"a",g:1},{k:"form",h:"Admission Form Received",t:"s",l:"Yes/No",g:1},{k:"prog",h:"Course Progress",t:"s",l:"Course Progress",g:1},{k:"cert",h:"Certificate Issued",t:"s",l:"Yes/No",g:1},{k:"enNo",h:"Enrolled #",t:"a",g:1}];
+let S={lists:JSON.parse(JSON.stringify(DEF)),rows:[]},tab=0,fq="",ff="";
+try{const s=localStorage.getItem("b7crm");if(s)S=JSON.parse(s)}catch(e){}
+let SES=null;try{SES=JSON.parse(localStorage.getItem("b7ses"))}catch(e){}
+const adm=()=>!SES||SES.role==="Admin";
+const API="PASTE_YOUR_WEB_APP_URL_HERE";
+const st=m=>{document.getElementById("sync").textContent=m};
+const post=o=>API.startsWith("http")&&SES?fetch(API,{method:"POST",body:JSON.stringify({...o,t:SES.token})}).then(r=>r.json()).then(j=>{if(j.err==="auth")logout();else if(j.err)st("Not allowed: "+j.err);else st("Saved to Google Sheet ✓")}).catch(()=>st("Not saved to Google Sheet – check connection")):0;
+const up=r=>{r.uid=r.uid||uid();save();post({a:"upsert",row:r})};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+async function load(){if(!API.startsWith("http")){st("Not connected to Google Sheet yet");return}if(!SES)return;try{const j=await(await fetch(API+"?t="+encodeURIComponent(SES.token))).json();if(j.err){if(j.err==="auth")logout();return}if(j.lists)S.lists=j.lists;else post({a:"lists",lists:S.lists});if(j.rows.length||!S.rows.length)S.rows=j.rows;else S.rows.forEach(r=>{r.uid=r.uid||uid();up(r)});save();const a=document.activeElement;if(!a||!/INPUT|SELECT/.test(a.tagName))draw();st("Synced with Google Sheet ✓")}catch(x){st("Can’t reach Google Sheet")}}
+const save=()=>{try{localStorage.setItem("b7crm",JSON.stringify(S))}catch(e){}};
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const T=iso(new Date());
+const dd=(s,n)=>{const d=new Date(s+"T00:00");d.setDate(d.getDate()+n);return iso(d)};
+const e=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const num=v=>parseFloat(v)||0;
+const fl=(d,skip)=>skip?"":!d?"No date set":d<T?"Overdue":d===T?"Due today":"Upcoming";
+function comp(r,i){const en=r.status==="Enrolled";const o={};
+o.id=r.name?"BB-"+pad(i+1).padStart(4,"0"):"";
+o.flag=(!r.status||en||r.status==="Lost")?"":fl(r.next);
+o.days=r.date?Math.round((new Date(T)-new Date(r.date))/864e5):"";
+const hasT=en&&r.total!==""&&r.total!=null;
+o.bal=hasT?num(r.total)-num(r.paid):"";
+o.pstat=hasT?(num(r.paid)>=num(r.total)?"Paid":num(r.paid)>0?"Partial":"Unpaid"):"";
+o.pflag=(o.bal===""||o.bal<=0)?"":fl(r.nextPay);
+return o}
+function enNos(){let n=0;return S.rows.map(r=>r.status==="Enrolled"?++n:"")}
+const inr=v=>v===""?"":"₹"+Math.round(v).toLocaleString("en-IN");
+const pc=v=>(v*100).toFixed(0)+"%";
+function opts(l,v){return '<option value=""></option>'+(S.lists[l]||[]).filter(Boolean).map(x=>`<option${x===v?" selected":""}>${e(x)}</option>`).join("")}
+function cell(r,c,i,a,en){
+if(c.t==="a"){let v=c.k==="enNo"?en[i]:a[c.k];if(c.k==="bal")v=inr(v);return `<td class="au ${/flag|pstat/.test(c.k)&&v?"f-"+v:""}" data-a="${c.k}">${e(v)}</td>`}
+const v=r[c.k]??"";
+if(c.t==="s")return `<td><select data-i="${i}" data-k="${c.k}">${opts(c.l,v)}</select></td>`;
+return `<td><input data-i="${i}" data-k="${c.k}" type="${c.t==="d"?"date":c.t==="n"?"number":"text"}" value="${e(v)}"></td>`}
+function dash(){const R=S.rows,A=R.map(comp),L=S.lists;
+const cnt=f=>R.filter(f).length,en=r=>r.status==="Enrolled";
+const tot=cnt(r=>r.phone),m1=T.slice(0,8)+"01";
+const k=[["TOTAL ENQUIRIES",tot],["THIS MONTH",cnt(r=>r.date>=m1&&r.date<=T)],["ENROLLED",cnt(en)],["CONVERSION",pc(tot?cnt(en)/tot:0)],["FOLLOW-UPS OVERDUE",A.filter(a=>a.flag==="Overdue").length],["DUE TODAY",A.filter(a=>a.flag==="Due today").length],["NO DATE SET",A.filter(a=>a.flag==="No date set").length],["FEES QUOTED OPEN (₹)",inr(R.filter(r=>r.status&&r.status!=="Enrolled"&&r.status!=="Lost").reduce((s,r)=>s+num(r.quoted),0))],["TODAY LEADS",cnt(r=>r.date===T)],["LAST DAY",cnt(r=>r.date===dd(T,-1))],["ENQUIRIES BY NUMBER",cnt(r=>r.name)]];
+const grp=(title,list,key,extra)=>{const rows=(L[list]||[]).filter(Boolean).map(x=>{const q=R.filter(r=>r[key]===x),n=q.filter(en).length;return `<tr><td>${e(x)}</td><td class="n">${q.length}</td>${extra(q,n)}</tr>`}).join("");return rows};
+const t=(title,head,body)=>`<div class="card"><h3>${title}</h3><table><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>${body}</table></div>`;
+const conv=(q,n)=>`<td class="n">${n}</td><td class="n">${pc(q.length?n/q.length:0)}</td>`;
+const stat=(L.Status||[]).filter(Boolean).map(x=>{const c=cnt(r=>r.status===x);return `<tr><td>${e(x)}</td><td class="n">${c}</td><td class="n">${pc(tot?c/tot:0)}</td></tr>`}).join("");
+const nos=R.length-cnt(r=>r.status);
+const lost=(L["Lost Reason"]||[]).filter(Boolean).map(x=>`<tr><td>${e(x)}</td><td class="n">${cnt(r=>r.lost===x)}</td></tr>`).join("");
+const sum=f=>R.filter(en).reduce((s,r)=>s+num(r[f]),0);
+const bal=A.reduce((s,a)=>s+(a.bal===""?0:a.bal),0);
+const ms=[["Students enrolled",cnt(en)],["Total fees (₹)",inr(sum("total"))],["Fees collected (₹)",inr(sum("paid"))],["Balance pending (₹)",inr(bal)],["Payments overdue",A.filter(a=>a.pflag==="Overdue").length],["Ongoing courses",cnt(r=>r.prog==="Ongoing")],["Courses completed",cnt(r=>r.prog==="Completed")],["Dropped out",cnt(r=>r.prog==="Dropped out")]].map(x=>`<tr><td>${x[0]}</td><td class="n">${x[1]}</td></tr>`).join("");
+const br=(L.Branch||[]).filter(Boolean).map(x=>{const q=R.filter(r=>r.branch===x),n=q.filter(en);return `<tr><td>${e(x)}</td><td class="n">${q.length}</td><td class="n">${n.length}</td><td class="n">${pc(q.length?n.length/q.length:0)}</td><td class="n">${inr(n.reduce((s,r)=>s+num(r.total),0))}</td></tr>`}).join("");
+return `<div class="kpis">${k.map(x=>`<div class="k"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div><div class="grid">`+
+t("Pipeline by status",["Status","Enquiries","% of total"],stat+`<tr><td>Enquiries without a status</td><td class="n">${nos}</td><td></td></tr>`)+
+t("Enquiries by source",["Source","Enquiries","Enrolled","Conversion"],grp("","Source","source",conv))+
+t("Enquiries by branch",["Branch","Enquiries","Enrolled","Conversion","Fees Collected (₹)"],br)+
+t("Enquiries by course",["Course","Enquiries","Enrolled","Conversion"],grp("","Course","course",conv))+
+t("Enquiries by counsellor",["Counsellor","Enquiries","Enrolled","Conversion"],grp("","Assigned To","assigned",conv))+
+t("Why enquiries were lost",["Reason","Count"],lost)+
+t("Enrolled students & fees",["Measure","Value"],ms)+"</div>"}
+function enq(){
+const hd=C.map(c=>`<th class="${c.t==="a"?"":"in"}">${c.h}</th>`).join("")+"<th></th>";
+const A=S.rows.map(comp),en=enNos();
+const body=S.rows.map((r,i)=>({r,i})).filter(({r,i})=>(!fq||(r.name+r.phone+r.city+r.notes).toLowerCase().includes(fq))&&(!ff||A[i].flag===ff)).map(({r,i})=>`<tr data-r="${i}">${C.map(c=>cell(r,c,i,A[i],en)).join("")}<td>${adm()?`<button class="btn g" data-del="${i}">✕</button>`:""}</td></tr>`).join("");
+return `<div class="bar"><button class="btn" id="add">+ New enquiry</button><input id="q" placeholder="Search name, phone, city, notes" value="${e(fq)}"><select id="ff"><option value="">All follow-up flags</option>${["Overdue","Due today","No date set","Upcoming"].map(x=>`<option${x===ff?" selected":""}>${x}</option>`).join("")}</select><button class="btn g" id="csv">Export CSV</button><span class="note">${S.rows.length} enquiries · yellow headers = type here, grey = automatic</span></div><div class="wrap"><table><tr>${hd}</tr>${body}</table></div>`}
+function enr(){const A=S.rows.map(comp);
+const cols=[["Enquiry ID","id"],["Student Name","name"],["Phone / WhatsApp","phone"],["Branch","branch"],["Course","course"],["Batch","batch"],["Enrolment Date","enrolDate"],["Course Start","cs"],["Course End","ce"],["Total Fee (₹)","total"],["Amount Paid (₹)","paid"],["Balance (₹)","bal"],["Payment Status","pstat"],["Next Payment Due","nextPay"],["Payment Flag","pflag"],["Admission Form Received","form"],["Course Progress","prog"],["Certificate Issued","cert"],["Assigned To","assigned"],["Notes","notes"]];
+const rows=S.rows.map((r,i)=>({r,a:A[i]})).filter(x=>x.r.status==="Enrolled").map(({r,a})=>`<tr>${cols.map(([h,k])=>{const v=a[k]!==undefined?(k==="bal"?inr(a[k]):a[k]):r[k]??"";return `<td class="${/pstat|pflag/.test(k)&&v?"f-"+v:""}">${e(v)}</td>`}).join("")}</tr>`).join("");
+return `<p class="note">Fills in automatically: any enquiry whose Status is “Enrolled” appears here in the order enrolled. Don’t type on this sheet – update the row on the Enquiries tab.</p><p><b>Students enrolled:</b> ${S.rows.filter(r=>r.status==="Enrolled").length}</p><div class="wrap"><table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join("")}</tr>${rows}</table></div>`}
+function lists(){return `<p class="note">Edit the values to change the dropdowns. Add new items in the empty cells below each list (up to 12 rows).</p><div class="ls">${LK.map(l=>`<div><b>${l}</b>${Array.from({length:12},(_,j)=>`<input ${adm()?"":"readonly "}data-l="${l}" data-j="${j}" value="${e((S.lists[l]||[])[j]||"")}">`).join("")}</div>`).join("")}</div>`}
+function how(){return `<div class="card"><h3>How to use this tracker</h3><ol><li>Add every new enquiry as a new row on the Enquiries tab (Date, Source, Name, Phone and Course are the minimum).</li><li>Pick Source, Course, Batch, Status, Assigned To and Lost Reason from the dropdowns. To change the options, edit the Lists tab.</li><li>After every call or message, update Status, Last Contact and Next Follow-up. The Follow-up Flag turns red when overdue.</li><li>Filter by Follow-up Flag = Overdue or Due today each morning to see who to call first.</li><li>When someone joins, set Status to Enrolled and fill Enrolment Date. If they drop out, set Lost and choose a Lost Reason.</li><li>When Status becomes Enrolled, fill in the enrolment details columns (Batch → Certificate Issued) on the same row.</li><li>The Enrolled Students tab and the Dashboard update by themselves – don’t type on them.</li></ol><h3>Colour guide</h3><p>Yellow headers = type here · Grey = automatic · Currency is Indian Rupees (₹). Branches: Angamaly, Kollam, Kochi, Palakkad. Data is saved in this browser only – use Export CSV to back it up.</p></div>`}
+function draw(){document.getElementById("nav").innerHTML=TABS.map((t,i)=>`<button class="${i===tab?"on":""}" data-t="${i}">${t}</button>`).join("");
+document.getElementById("main").innerHTML=[dash,enq,enr,lists,how][tab]()}
+document.getElementById("today").textContent="Updated automatically · Today: "+new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+document.addEventListener("click",ev=>{const t=ev.target;
+if(t.dataset.t!==undefined){tab=+t.dataset.t;draw()}
+else if(t.id==="add"){const nr={uid:uid(),date:T,status:"New"};S.rows.push(nr);save();draw();up(nr)}
+else if(t.dataset.del!==undefined){if(confirm("Delete this enquiry?")){const d=S.rows.splice(+t.dataset.del,1)[0];save();draw();if(d&&d.uid)post({a:"delete",uid:d.uid})}}
+else if(t.id==="csv"){const A=S.rows.map(comp),en=enNos();const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const out=[C.map(c=>q(c.h)).join(",")].concat(S.rows.map((r,i)=>C.map(c=>q(c.t==="a"?(c.k==="enNo"?en[i]:A[i][c.k]):r[c.k])).join(",")));const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(out.join("\n"));a.download="enquiries.csv";a.click()}});
+document.addEventListener("input",ev=>{if(ev.target.id==="q"){fq=ev.target.value.toLowerCase();const p=ev.target.selectionStart;draw();const q=document.getElementById("q");q.focus();q.setSelectionRange(p,p)}});
+document.addEventListener("change",ev=>{const t=ev.target;
+if(t.id==="ff"){ff=t.value;draw()}
+else if(t.dataset.l){const l=t.dataset.l;S.lists[l]=S.lists[l]||[];S.lists[l][+t.dataset.j]=t.value;S.lists[l]=S.lists[l].map(x=>x||"");save();post({a:"lists",lists:S.lists})}
+else if(t.dataset.k){S.rows[+t.dataset.i][t.dataset.k]=t.value;save();up(S.rows[+t.dataset.i]);const i=+t.dataset.i,a=comp(S.rows[i],i),en=enNos(),tr=t.closest("tr");
+tr.querySelectorAll("td[data-a]").forEach(td=>{const k=td.dataset.a;let v=k==="enNo"?en[i]:a[k];if(k==="bal")v=inr(v);td.textContent=v;td.className="au "+(/flag|pstat/.test(k)&&v?"f-"+v:"")})}});
+let pend="";
+const lg=document.getElementById("login");
+function showLogin(step,msg){lg.style.display="flex";lg.innerHTML=`<div class="card"><h3>B7 Academy CRM – Sign in</h3>`+(step===1?`<div class="note">Enter your work email. We’ll send you a 6-digit code.</div><input id="em" type="email" placeholder="you@example.com" autocomplete="email"><button class="btn" id="sc">Send code</button>`:`<div class="note">Code sent to ${e(pend)}. It expires in 10 minutes.</div><input id="cd" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button class="btn" id="vc">Verify</button> <button class="btn g" id="bk">Back</button>`)+`<div class="err" id="er">${e(msg||"")}</div></div>`}
+async function api(o){return (await fetch(API,{method:"POST",body:JSON.stringify(o)})).json()}
+function start(){lg.style.display="none";document.getElementById("who").innerHTML=SES?`${e(SES.name||SES.email)} (${e(SES.role)}) · <a href="#" id="lo">Log out</a>`:"";draw();load();if(!window.iv)window.iv=setInterval(load,30000)}
+function logout(){if(SES)fetch(API,{method:"POST",body:JSON.stringify({a:"logout",t:SES.token})}).catch(()=>{});try{localStorage.removeItem("b7ses");localStorage.removeItem("b7crm")}catch(x){}SES=null;S={lists:JSON.parse(JSON.stringify(DEF)),rows:[]};document.getElementById("who").textContent="";showLogin(1,"")}
+document.addEventListener("click",async ev=>{const id=ev.target.id,er=()=>document.getElementById("er");
+if(id==="lo"){ev.preventDefault();logout()}
+else if(id==="bk")showLogin(1,"");
+else if(id==="sc"){pend=document.getElementById("em").value.trim().toLowerCase();if(!pend)return;er().textContent="Sending…";try{const j=await api({a:"login",email:pend});if(j.err)er().textContent=j.err;else showLogin(2,"")}catch(x){er().textContent="Can’t reach the server"}}
+else if(id==="vc"){const c=document.getElementById("cd").value.trim();er().textContent="Checking…";try{const j=await api({a:"verify",email:pend,code:c});if(j.err)er().textContent=j.err;else{SES=j;try{localStorage.setItem("b7ses",JSON.stringify(j))}catch(x){}start()}}catch(x){er().textContent="Can’t reach the server"}}});
+if(API.startsWith("http")&&!SES)showLogin(1,"");else start();
+</script></body></html>
